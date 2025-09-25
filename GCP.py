@@ -31,19 +31,34 @@ def evaluate_colored_graphs(colored_graphs):
         colored_graphs_evaluated.update({graph: graph_value})
     
     return colored_graphs_evaluated
-        
+
+# Seleção dos grafos que vão reproduzir por roleta
+def roulette_wheel_selection(evaluated_graphs, reproduction_rate):
+    total_value = sum(evaluated_graphs.values())
+    graphs_for_reproduction = []
+    
+    for _ in range(reproduction_rate * 2):
+        pick = random.uniform(0, total_value)
+        current = 0
+        for graph, value in evaluated_graphs.items():
+            current += value
+            if current > pick:
+                graphs_for_reproduction.append(graph)
+                break
+            
+    return graphs_for_reproduction
 
 # Algoritmo genético para decidir o grafo com melhor coloração
 def color_graph(graph, number_colors, limit_of_generations):
-    print(graph.number_of_edges())
-    
     random_10_graphs = generate_random_colored_graphs(graph, number_colors, 10)
     evaluated_graphs = evaluate_colored_graphs(random_10_graphs)
     
-    print("Coloração ideal do grafo:")
     for node in evaluated_graphs:
         if evaluated_graphs[node] == graph.number_of_edges():
             return node
+
+    graphs_for_reproduction = roulette_wheel_selection(evaluated_graphs, 1)
+    
 
 def main():
     G = nx.Graph([(0, 1), (1, 3),(1, 2), (2, 0), (0, 3)])
