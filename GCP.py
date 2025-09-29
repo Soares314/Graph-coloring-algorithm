@@ -1,5 +1,7 @@
 import random
 import networkx as nx
+import matplotlib.pyplot as plt
+import matplotlib.colors as mcolors
 
 # Gera x grafos coloridos de forma aleátoria
 def generate_random_colored_graphs(graph, number_colors, number_graphs):
@@ -47,17 +49,6 @@ def roulette_wheel_selection(evaluated_graphs, reproduction_rate):
                 break
             
     return graphs_for_reproduction
-
-# Algoritmo genético para decidir o grafo com melhor coloração
-def color_graph(graph, number_colors, limit_of_generations):
-    random_10_graphs = generate_random_colored_graphs(graph, number_colors, 10)
-    evaluated_graphs = evaluate_colored_graphs(random_10_graphs)
-    
-    for node in evaluated_graphs:
-        if evaluated_graphs[node] == graph.number_of_edges():
-            return node
-
-    graphs_for_reproduction = roulette_wheel_selection(evaluated_graphs, 1)
     
 
 # Crossover entre dois pais
@@ -111,12 +102,38 @@ def color_graph(graph, number_colors, limit_of_generations):
     
     return best_graph
 
-def main():
-    G = nx.Graph([(0, 1), (1, 3),(1, 2), (2, 0), (0, 3)])
+# Plota o grafo colorido
+def plot_colored_graph(graph, title, ax):
+    pos = nx.spring_layout(graph)
+    
+    # Mapeia cores para valores RGB
+    color_map = ['red', 'blue', 'green', 'yellow', 'orange', 'purple', 'brown', 'pink']
+    node_colors = [color_map[graph.nodes[node]['color']] for node in graph.nodes()]
+    
+    nx.draw(graph, pos, ax=ax, with_labels=True, node_color=node_colors, 
+            node_size=500, font_size=16, font_weight='bold')
+    ax.set_title(title, fontsize=14, fontweight='bold')
 
-    result = color_graph(G, 3, 20)
-    print("Cores finais:")
-    for node, data in result.nodes(data=True):
-        print(f"Nó {node}: cor {data['color']}")
+def main():
+    
+    # Grafos Entrada
+    G0 = nx.Graph([(0, 1), (0, 2),(2, 3), (1, 3)])
+    G1 = nx.Graph([(0, 1), (0, 2), (0, 3), (1, 4), (1, 5), (2, 6), (2, 7), (3, 8), (3, 9), (4,5), (6,7), (8,9)])
+    G2 = nx.Graph([(0,1),(0,4),(0,5),(0,6),(1,2),(1,5),(1,7),(2,3),(2,6),(2,8),(3,4),(3,7),(3,9),(4,5),(4,8),(4,10),(5,9),(5,11),(6,7),(6,10),(6,12),(7,11),(7,13),(8,9),(8,12),(8,14),(9,13),(9,15),(10,11),(10,14),(10,16),(11,15),(11,17),(12,13),(12,16),(12,18),(13,17),(13,19),(14,15),(14,18),(15,19),(16,17),(17,18),(18,19)])
+
+    # Grafos Saída
+    GC0 = color_graph(G0, 2, 100)
+    GC1 = color_graph(G1, 3, 200)
+    GC2 = color_graph(G2, 5, 10000)
+    
+    # Plota os três grafos coloridos
+    fig, axes = plt.subplots(1, 3, figsize=(15, 5))
+    
+    plot_colored_graph(GC0, 'Grafo GC0 (2 cores)', axes[0])
+    plot_colored_graph(GC1, 'Grafo GC1 (3 cores)', axes[1]) 
+    plot_colored_graph(GC2, 'Grafo GC2 (5 cores)', axes[2])
+
+    plt.tight_layout()
+    plt.show()
 
 main()
